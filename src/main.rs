@@ -1,5 +1,13 @@
 fn main() {
     let args = Cli::parse();
+
+    let response = reqwest::blocking::get(
+        "https://schedule.hololive.tv/simple",
+    )
+    .unwrap()
+    .text()
+    .unwrap();
+    dbg!(response);
 }
 
 use clap::Parser;
@@ -8,9 +16,7 @@ use clap::Parser;
 #[derive(Parser)]
 struct Cli {
     /// The pattern to look for
+    #[clap(default_value="", short = 'p', long = "pattern")]
     pattern: String,
-    /// The path to the file to read
-    #[clap(parse(from_os_str))]
-    path: std::path::PathBuf,
 }
 
