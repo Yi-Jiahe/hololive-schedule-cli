@@ -29,21 +29,32 @@ struct LiveVideo {
 }
 
 #[derive(Deserialize, Debug)]
-struct LiveResponse {
-    live: Option<Vec<LiveVideo>>,
-    upcoming: Option<Vec<LiveVideo>>,
-    ended: Option<Vec<LiveVideo>>,
-    cached: Option<bool>,
-    message: Option<String>
+struct Success {
+    live: Vec<LiveVideo>,
+    upcoming: Vec<LiveVideo>,
+    ended: Vec<LiveVideo>,
+    cached: bool,
+}
+
+#[derive(Deserialize, Debug)]
+struct Error {
+    message: String,
+}
+
+#[derive(Deserialize, Debug)]
+#[serde(untagged)]
+enum LiveResponse {
+    Success(Success),
+    Error(Error)
 }
 
 pub fn get_live() {
     let response = reqwest::blocking::get(format!("{}{}?{}", HOST, "/live", "hide_channel_desc=1&max_upcoming_hours=48&lookback_hours=11")).unwrap();
     let deserialized_response = response.json::<LiveResponse>();
     match deserialized_response {
-        Result::Ok(LiveResponse { live, upcoming, ended, message, .. }) => {
-            if let (Some(mut live), Some(mut upcoming), Some(mut ended)) = 
-            (live, upcoming, ended) {
+        Result::Ok(live_response) => {
+            match live_response{
+                LiveResponse::Success(Success {mut live, mut upcoming, mut ended, ..}) => {
                     println!("--- Live ---");
                     live.sort_by(|a, b| a.live_start.cmp(&b.live_start));
                     for video in live {
@@ -54,6 +65,7 @@ pub fn get_live() {
                     println!("");
         
                     println!("--- Upcoming ---");
+                    upcoming.sort_by(|a, b| a.live_schedule.cmp(&b.live_schedule));
                     for video in upcoming {
                         if let Some(start) = video.live_schedule {
                             println!("{} {} {}", start, video.channel.name, video.title)
@@ -62,6 +74,7 @@ pub fn get_live() {
                     println!("");
         
                     println!("--- Ended ---");
+                    ended.sort_by(|a, b| a.live_start.cmp(&b.live_start));
                     for video in ended {
                         if let Some(start) = video.live_start {
                             println!("{} {} {}", start, video.channel.name, video.title)
@@ -69,8 +82,10 @@ pub fn get_live() {
                     }
                     println!("");
                 }
-            else if let Some(message) = message {
-                println!("{}", message);
+                LiveResponse::Error(error) => {
+                    println!("{}", error.message);
+
+                }
             }
         }
         Result::Err(error) => println!("Error: {}", error)
