@@ -48,8 +48,9 @@ enum LiveResponse {
     Error(Error)
 }
 
-pub fn get_live() {
-    let response = reqwest::blocking::get(format!("{}{}?{}", HOST, "/live", "hide_channel_desc=1&max_upcoming_hours=48&lookback_hours=11")).unwrap();
+pub fn get_live(max_upcoming_hours: f32, lookback_hours:f32) {
+    let query_string = format!("hide_channel_desc=1&max_upcoming_hours={}&lookback_hours={}", max_upcoming_hours, lookback_hours);
+    let response = reqwest::blocking::get(format!("{}{}?{}", HOST, "/live", query_string)).unwrap();
     let deserialized_response = response.json::<LiveResponse>();
     match deserialized_response {
         Result::Ok(live_response) => {
