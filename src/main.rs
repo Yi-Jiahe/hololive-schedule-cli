@@ -1,4 +1,3 @@
-use holo_schedule::schedule_dot_hololive_scraper;
 use holo_schedule::holoapi_wrapper;
 
 fn main() {
