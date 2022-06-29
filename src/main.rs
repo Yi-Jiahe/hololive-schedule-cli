@@ -1,9 +1,10 @@
 use holo_schedule::schedule_dot_hololive_scraper;
+use holo_schedule::holoapi_wrapper;
 
 fn main() {
     let args = Cli::parse();
 
-    schedule_dot_hololive_scraper::scrape();    
+    holoapi_wrapper::get_live(); 
 }
 
 use clap::Parser;
