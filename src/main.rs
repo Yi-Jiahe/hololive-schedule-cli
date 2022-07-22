@@ -8,7 +8,7 @@ fn main() {
 
 use clap::Parser;
 
-/// Search for a pattern in a file and display the lines that contain it.
+/// List streams.
 #[derive(Parser)]
 struct Cli {
     #[clap(default_value = "24", long = "max_upcoming_hours")]
