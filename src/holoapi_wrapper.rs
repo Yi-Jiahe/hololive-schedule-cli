@@ -1,5 +1,7 @@
 use serde::Deserialize;
 
+use crate::formatter::format_line;
+
 const HOST: &str = "https://api.holotools.app/v1";
 
 #[derive(Deserialize, Debug)]
@@ -60,7 +62,7 @@ pub fn get_live(max_upcoming_hours: f32, lookback_hours:f32) {
                     ended.sort_by(|a, b| a.live_start.cmp(&b.live_start));
                     for video in ended {
                         if let Some(start) = video.live_start {
-                            println!("{} {} {}", start, video.channel.name, video.title)
+                            format_line(start, video.channel.name, video.title);
                         }
                     }
                     println!("");
@@ -69,7 +71,7 @@ pub fn get_live(max_upcoming_hours: f32, lookback_hours:f32) {
                     live.sort_by(|a, b| a.live_start.cmp(&b.live_start));
                     for video in live {
                         if let Some(start) = video.live_start {
-                            println!("{} {} {}", start, video.channel.name, video.title)
+                            format_line(start, video.channel.name, video.title);
                         }
                     }
                     println!("");
@@ -78,7 +80,7 @@ pub fn get_live(max_upcoming_hours: f32, lookback_hours:f32) {
                     upcoming.sort_by(|a, b| a.live_schedule.cmp(&b.live_schedule));
                     for video in upcoming {
                         if let Some(start) = video.live_schedule {
-                            println!("{} {} {}", start, video.channel.name, video.title)
+                            format_line(start, video.channel.name, video.title);
                         }
                     }
                     println!("");
@@ -91,5 +93,4 @@ pub fn get_live(max_upcoming_hours: f32, lookback_hours:f32) {
         }
         Result::Err(error) => println!("Error: {}", error)
     }
-
 }
