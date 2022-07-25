@@ -4,10 +4,10 @@ use dotenv::dotenv;
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
-    VideoSortingCriteria, VideoType
+    VideoSortingCriteria, VideoType, VideoChannel, VideoLiveInfo, VideoStatus
 };
 
-use holo_schedule::holoapi_wrapper;
+use holo_schedule::formatter::{LiveStatus, format_line};
 
 fn main() {
     dotenv().ok();
@@ -34,13 +34,12 @@ fn main() {
     let args = Cli::parse();
 
     let filter = VideoFilterBuilder::new()
-    .organisation(Organisation::Independents)
-    .language(&[Language::Japanese])
+    .organisation(Organisation::Hololive)
+    .language(&[Language::All])
     .video_type(VideoType::Stream)
     .max_upcoming_hours(24)
-    .include(&[ExtraVideoInfo::Description])
+    .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
     .sort_by(VideoSortingCriteria::StartScheduled)
-    .limit(5)
     .build();
 
     let results = match client.videos(&filter) {
@@ -61,8 +60,26 @@ fn main() {
         }
     };
 
-    for stream in results {
-        println!("{}", stream.title);
+    for stream in results.iter().rev() {
+        let start = match stream.live_info {
+            VideoLiveInfo{ start_scheduled: _, start_actual: Some(start_actual), .. } => start_actual,
+            VideoLiveInfo{ start_scheduled: Some(start_scheduled), start_actual: None, .. } => start_scheduled,
+            _ => panic!("Could not get start time"),
+        };
+
+        let live_status = match stream.status {
+            VideoStatus::Upcoming => LiveStatus::Upcoming,
+            VideoStatus::Live => LiveStatus::Live,
+            VideoStatus::Past => LiveStatus::Ended, 
+            _ => LiveStatus::Other,
+        };
+
+        match &stream.channel {
+            VideoChannel::Min(channel_min) => {
+                println!("{}", format_line(start.to_string(), channel_min.name.clone(), stream.title.clone(), live_status));
+            },
+            _ => (),
+        }
     }
 }
 

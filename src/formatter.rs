@@ -9,9 +9,10 @@ pub enum LiveStatus {
     Ended,
     Live,
     Upcoming,
+    Other,
 }
 
-pub fn format_line(start: String, channel_name: String, stream_title: String, live_status: LiveStatus) {
+pub fn format_line(start: String, channel_name: String, stream_title: String, live_status: LiveStatus) -> String {
 
     let channel_name_width = UnicodeWidthStr::width(&channel_name[..]);
 
@@ -29,15 +30,13 @@ pub fn format_line(start: String, channel_name: String, stream_title: String, li
 
     let line = format!("{:<30} {} {}", start, channel_name_col, stream_title);
 
-    // println!("{}", line);
-
     /*
     TODO:
     Binary compiled for Windows only shows color for Powershell. Git Bash shows the ansi characters.
     */
     match live_status {
-        LiveStatus::Ended => println!("{}", RGB(105, 105, 105).paint(line)),
-        LiveStatus::Live => println!("{}", Red.paint(line)),
-        LiveStatus::Upcoming => println!("{}", line),
-    };
+        LiveStatus::Ended => RGB(200, 200, 200).paint(line).to_string(),
+        LiveStatus::Live => Red.paint(line).to_string(),
+        LiveStatus::Upcoming | LiveStatus::Other => line,
+    }
 }
