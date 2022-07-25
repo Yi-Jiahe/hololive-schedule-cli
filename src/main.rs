@@ -31,6 +31,8 @@ fn main() {
         }
     };
 
+    let args = Cli::parse();
+
     let filter = VideoFilterBuilder::new()
     .organisation(Organisation::Independents)
     .language(&[Language::Japanese])
@@ -62,10 +64,6 @@ fn main() {
     for stream in results {
         println!("{}", stream.title);
     }
-
-    let args = Cli::parse();
-
-    holoapi_wrapper::get_live(args.max_upcoming_hours, args.lookback_hours);
 }
 
 use clap::Parser;
