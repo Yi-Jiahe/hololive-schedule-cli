@@ -1,6 +1,4 @@
-extern crate dotenv;
-
-use dotenv::dotenv;
+const TOKEN: &str = env!("HOLODEX_API_TOKEN");
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
@@ -10,11 +8,7 @@ use holodex::model::{
 use holo_schedule::formatter::{LiveStatus, format_line};
 
 fn main() {
-    dotenv().ok();
-
-    let token = std::env::var("HOLODEX_API_TOKEN").unwrap();
-
-    let client = match holodex::Client::new(&token) {
+    let client = match holodex::Client::new(&TOKEN) {
         Result::Ok(client) => client,
         Result::Err(err) => {
             match err {
