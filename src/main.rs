@@ -1,3 +1,5 @@
+use chrono::prelude::*;
+
 const TOKEN: &str = env!("HOLODEX_API_TOKEN");
 
 use holodex::model::{
@@ -55,11 +57,11 @@ fn main() {
     };
 
     for stream in results.iter().rev() {
-        let start = match stream.live_info {
+        let start: DateTime<Local> = DateTime::from(match stream.live_info {
             VideoLiveInfo{ start_scheduled: _, start_actual: Some(start_actual), .. } => start_actual,
             VideoLiveInfo{ start_scheduled: Some(start_scheduled), start_actual: None, .. } => start_scheduled,
             _ => panic!("Could not get start time"),
-        };
+        });
 
         let live_status = match stream.status {
             VideoStatus::Upcoming => LiveStatus::Upcoming,
@@ -70,7 +72,7 @@ fn main() {
 
         match &stream.channel {
             VideoChannel::Min(channel_min) => {
-                println!("{}", format_line(start.to_string(), channel_min.name.clone(), stream.title.clone(), live_status));
+                println!("{}", format_line(start.format("%e %b %T").to_string(), channel_min.name.clone(), stream.title.clone(), live_status));
             },
             _ => (),
         }

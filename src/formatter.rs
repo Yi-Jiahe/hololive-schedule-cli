@@ -28,7 +28,7 @@ pub fn format_line(start: String, channel_name: String, stream_title: String, li
         channel_name
     };
 
-    let line = format!("{:<30} {} {}", start, channel_name_col, stream_title);
+    let line = format!("{:<20} {} {}", start, channel_name_col, stream_title);
 
     /*
     TODO:
