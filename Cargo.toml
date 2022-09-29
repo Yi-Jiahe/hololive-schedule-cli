@@ -13,4 +13,6 @@ scraper = "0.12.0"
 unicode-width = "0.1.5"
 ansi_term = "0.12.1"
 chrono = "0.4"
+dirs = "4.0"
+toml = "0.5.9"
 holodex = { git = "https://github.com/Yi-Jiahe/holodex-rs" }

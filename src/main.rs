@@ -1,6 +1,17 @@
+use std::fs;
+use std::fs::OpenOptions;
+use std::io::prelude::*;
+
+extern crate dirs;
+extern crate toml;
+
+use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
 
-const TOKEN: &str = env!("HOLODEX_API_TOKEN");
+#[derive(Serialize, Deserialize)]
+struct Config {
+    holodex_api_token: Option<String>
+}
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
@@ -10,7 +21,37 @@ use holodex::model::{
 use holo_schedule::formatter::{LiveStatus, format_line};
 
 fn main() {
-    let client = match holodex::Client::new(&TOKEN) {
+    let home_dir = dirs::home_dir().unwrap();
+    let config_dir = format!("{}/.holo-schedule", home_dir.display());
+
+    match fs::create_dir(&config_dir) {
+        Ok(()) => {},
+        Err(err) => match err.kind() {
+            std::io::ErrorKind::AlreadyExists => {},
+            _ => {panic!("{}", err)}
+        }
+    };
+
+    let mut config_file = OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create(true)
+                .open(format!("{}/.config", &config_dir)).unwrap();
+
+    let mut contents = String::new();
+    config_file.read_to_string(&mut contents).unwrap();
+
+    let config: Config = toml::from_str(&contents).unwrap();
+
+    match &config.holodex_api_token {
+        Some(token) => {},
+        None => {
+            // TODO: Request for API KEY and save value
+            panic!("No token in config")
+        }
+    }
+
+    let client = match holodex::Client::new(&config.holodex_api_token.unwrap()) {
         Result::Ok(client) => client,
         Result::Err(err) => {
             match err {
