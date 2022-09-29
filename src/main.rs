@@ -1,5 +1,6 @@
 use std::fs;
 use std::fs::OpenOptions;
+use std::io;
 use std::io::prelude::*;
 
 extern crate dirs;
@@ -53,8 +54,23 @@ fn main() {
     };
 
     if config.holodex_api_token == "" {
-        // TODO: Prompt for token
-        panic!("Please add api token")
+        println!("Please provide Holodex API token:");
+
+        let mut token = String::new();
+
+        io::stdin()
+            .read_line(&mut token)
+            .expect("Failed to read line");
+        token = token.trim().to_string();
+
+        config.holodex_api_token = token;
+
+        let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .truncate(true)
+        .open(format!("{}/.config", &config_dir)).unwrap();
+        file.write_all(toml::to_string(&config).unwrap().as_bytes());
     }
 
     let client = match holodex::Client::new(&config.holodex_api_token) {
