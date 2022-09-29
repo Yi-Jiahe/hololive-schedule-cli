@@ -1,7 +1,5 @@
 use std::fs;
-use std::fs::OpenOptions;
 use std::io;
-use std::io::prelude::*;
 
 extern crate dirs;
 extern crate toml;
@@ -28,29 +26,18 @@ fn main() {
         }
     };
 
-    let mut config = match OpenOptions::new()
-        .read(true)
-        .write(true)
-        .open(format!("{}/.config", &config_dir)) {
-        Ok(mut file) => {
-            let mut contents = String::new();
-            file.read_to_string(&mut contents).unwrap();
-            toml::from_str(&contents).unwrap()
-        },
-        Err(err) => match err.kind() {
-                std::io::ErrorKind::NotFound => {
-                    let config = Config::new();
+    let config_file_path = format!("{}/.config", config_dir);
 
-                    let mut file = OpenOptions::new()
-                    .read(true)
-                    .write(true)
-                    .create(true)
-                    .open(format!("{}/.config", &config_dir)).unwrap();
-                    file.write_all(toml::to_string(&config).unwrap().as_bytes());
-                    config
-                },
-                _ => {panic!("{}", err)}
-            }
+    let mut config = match Config::from_file(&config_file_path) {
+        Ok(config) => config,
+        Err(err) => match err.kind() {
+            std::io::ErrorKind::NotFound => {
+                let config = Config::new();
+                config.write_to_file(&config_file_path);
+                config
+            },
+            _ => panic!("{}", err)
+        }
     };
 
     if config.holodex_api_token == "" {
@@ -65,12 +52,7 @@ fn main() {
 
         config.holodex_api_token = token;
 
-        let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .truncate(true)
-        .open(format!("{}/.config", &config_dir)).unwrap();
-        file.write_all(toml::to_string(&config).unwrap().as_bytes());
+        config.write_to_file(&config_file_path);
     }
 
     let client = match holodex::Client::new(&config.holodex_api_token) {
