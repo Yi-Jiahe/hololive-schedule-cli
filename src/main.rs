@@ -10,8 +10,10 @@ use chrono::prelude::*;
 
 #[derive(Serialize, Deserialize)]
 struct Config {
-    holodex_api_token: Option<String>
+    holodex_api_token: String
 }
+
+
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
@@ -43,15 +45,12 @@ fn main() {
 
     let config: Config = toml::from_str(&contents).unwrap();
 
-    match &config.holodex_api_token {
-        Some(token) => {},
-        None => {
-            // TODO: Request for API KEY and save value
-            panic!("No token in config")
-        }
+    if config.holodex_api_token == "" {
+        // TODO: Prompt for token
+        panic!("Please add api token")
     }
 
-    let client = match holodex::Client::new(&config.holodex_api_token.unwrap()) {
+    let client = match holodex::Client::new(&config.holodex_api_token) {
         Result::Ok(client) => client,
         Result::Err(err) => {
             match err {
