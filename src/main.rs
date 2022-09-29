@@ -133,7 +133,7 @@ fn main() {
                     "{}",
                     format_line(
                         &config,
-                        start.format("%e %b %T").to_string(),
+                        start.format("%e %b %H:%M").to_string(),
                         channel_min.name.clone(),
                         title,
                         live_status
