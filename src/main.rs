@@ -72,7 +72,8 @@ fn main() {
 
         match &stream.channel {
             VideoChannel::Min(channel_min) => {
-                println!("{}", format_line(start.format("%e %b %T").to_string(), channel_min.name.clone(), stream.title.clone(), live_status));
+                let title = format!("{:<10} {}", stream.id.to_string(), stream.title.clone());
+                println!("{}", format_line(start.format("%e %b %T").to_string(), channel_min.name.clone(), title, live_status));
             },
             _ => (),
         }
