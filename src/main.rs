@@ -28,6 +28,7 @@ fn main() {
 
     let config_file_path = format!("{}/.config", config_dir);
 
+    // Get config from file or create new config & save to file
     let mut config = match Config::from_file(&config_file_path) {
         Ok(config) => config,
         Err(err) => match err.kind() {
@@ -40,6 +41,7 @@ fn main() {
         }
     };
 
+    // Get API token from user if absent
     if config.holodex_api_token == "" {
         println!("Please provide Holodex API token:");
 
