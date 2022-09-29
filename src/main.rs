@@ -152,6 +152,4 @@ use clap::Parser;
 struct Arguments {
     #[clap(default_value = "24", short = 'u', long = "max_upcoming_hours")]
     max_upcoming_hours: f32,
-    #[clap(default_value = "11", long = "lookback_hours")]
-    lookback_hours: f32,
 }
