@@ -27,19 +27,30 @@ fn main() {
         }
     };
 
-    let mut config = Config::new();
-    config = dbg!(config);
+    let mut config = match OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(format!("{}/.config", &config_dir)) {
+        Ok(mut file) => {
+            let mut contents = String::new();
+            file.read_to_string(&mut contents).unwrap();
+            toml::from_str(&contents).unwrap()
+        },
+        Err(err) => match err.kind() {
+                std::io::ErrorKind::NotFound => {
+                    let config = Config::new();
 
-    let mut config_file = OpenOptions::new()
-                .read(true)
-                .write(true)
-                .create(true)
-                .open(format!("{}/.config", &config_dir)).unwrap();
-
-    let mut contents = String::new();
-    config_file.read_to_string(&mut contents).unwrap();
-
-    config = toml::from_str(&contents).unwrap();
+                    let mut file = OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .create(true)
+                    .open(format!("{}/.config", &config_dir)).unwrap();
+                    file.write_all(toml::to_string(&config).unwrap().as_bytes());
+                    config
+                },
+                _ => {panic!("{}", err)}
+            }
+    };
 
     if config.holodex_api_token == "" {
         // TODO: Prompt for token
