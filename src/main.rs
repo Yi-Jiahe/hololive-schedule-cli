@@ -7,12 +7,12 @@ extern crate toml;
 use chrono::prelude::*;
 
 use holodex::model::{
-    builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
-    VideoSortingCriteria, VideoType, VideoChannel, VideoLiveInfo, VideoStatus
+    builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation, VideoChannel,
+    VideoLiveInfo, VideoSortingCriteria, VideoStatus, VideoType,
 };
 
 use holo_schedule::config::Config;
-use holo_schedule::formatter::{LiveStatus, format_line};
+use holo_schedule::formatter::{format_line, LiveStatus};
 
 fn main() {
     let args = Arguments::parse();
@@ -21,11 +21,13 @@ fn main() {
     let config_dir = format!("{}/.holo-schedule", home_dir.display());
 
     match fs::create_dir(&config_dir) {
-        Ok(()) => {},
+        Ok(()) => {}
         Err(err) => match err.kind() {
-            std::io::ErrorKind::AlreadyExists => {},
-            _ => {panic!("{}", err)}
-        }
+            std::io::ErrorKind::AlreadyExists => {}
+            _ => {
+                panic!("{}", err)
+            }
+        },
     };
 
     let config_file_path = format!("{}/.config", config_dir);
@@ -38,9 +40,9 @@ fn main() {
                 let config = Config::new();
                 config.write_to_file(&config_file_path);
                 config
-            },
-            _ => panic!("{}", err)
-        }
+            }
+            _ => panic!("{}", err),
+        },
     };
 
     // Get API token from user if absent
@@ -66,10 +68,9 @@ fn main() {
                 holodex::errors::Error::InvalidApiToken => {
                     panic!("The API token provided to the client is invalid.")
                 }
-                holodex::errors::Error::HttpClientCreationError(err) => panic!(
-                    "An error occurred while creating the HTTP client.\n{}",
-                    err
-                ),
+                holodex::errors::Error::HttpClientCreationError(err) => {
+                    panic!("An error occurred while creating the HTTP client.\n{}", err)
+                }
                 // Client::new() only returns the above 2 types of error
                 _ => panic!("{}", err),
             }
@@ -77,13 +78,13 @@ fn main() {
     };
 
     let filter = VideoFilterBuilder::new()
-    .organisation(Organisation::Hololive)
-    .language(&[Language::All])
-    .video_type(VideoType::Stream)
-    .max_upcoming_hours(args.max_upcoming_hours as u32)
-    .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
-    .sort_by(VideoSortingCriteria::StartScheduled)
-    .build();
+        .organisation(Organisation::Hololive)
+        .language(&[Language::All])
+        .video_type(VideoType::Stream)
+        .max_upcoming_hours(args.max_upcoming_hours as u32)
+        .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
+        .sort_by(VideoSortingCriteria::StartScheduled)
+        .build();
 
     let results = match client.videos(&filter) {
         Result::Ok(results) => results,
@@ -105,23 +106,40 @@ fn main() {
 
     for stream in results.iter().rev() {
         let start: DateTime<Local> = DateTime::from(match stream.live_info {
-            VideoLiveInfo{ start_scheduled: _, start_actual: Some(start_actual), .. } => start_actual,
-            VideoLiveInfo{ start_scheduled: Some(start_scheduled), start_actual: None, .. } => start_scheduled,
+            VideoLiveInfo {
+                start_scheduled: _,
+                start_actual: Some(start_actual),
+                ..
+            } => start_actual,
+            VideoLiveInfo {
+                start_scheduled: Some(start_scheduled),
+                start_actual: None,
+                ..
+            } => start_scheduled,
             _ => panic!("Could not get start time"),
         });
 
         let live_status = match stream.status {
             VideoStatus::Upcoming => LiveStatus::Upcoming,
             VideoStatus::Live => LiveStatus::Live,
-            VideoStatus::Past => LiveStatus::Ended, 
+            VideoStatus::Past => LiveStatus::Ended,
             _ => LiveStatus::Other,
         };
 
         match &stream.channel {
             VideoChannel::Min(channel_min) => {
                 let title = format!("{:<10} {}", stream.id.to_string(), stream.title.clone());
-                println!("{}", format_line(&config, start.format("%e %b %T").to_string(), channel_min.name.clone(), title, live_status));
-            },
+                println!(
+                    "{}",
+                    format_line(
+                        &config,
+                        start.format("%e %b %T").to_string(),
+                        channel_min.name.clone(),
+                        title,
+                        live_status
+                    )
+                );
+            }
             _ => (),
         }
     }
@@ -132,7 +150,7 @@ use clap::Parser;
 /// List streams.
 #[derive(Parser)]
 struct Arguments {
-    #[clap(default_value = "24", short='u', long = "max_upcoming_hours")]
+    #[clap(default_value = "24", short = 'u', long = "max_upcoming_hours")]
     max_upcoming_hours: f32,
     #[clap(default_value = "11", long = "lookback_hours")]
     lookback_hours: f32,

@@ -1,34 +1,31 @@
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub holodex_api_token: String,
-    pub format: Format
+    pub format: Format,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Format {
-    pub channel_name_col_length: usize
+    pub channel_name_col_length: usize,
 }
 
 impl Config {
     pub fn new() -> Config {
-        Config{
+        Config {
             holodex_api_token: "".to_string(),
-            format: Format{
-                channel_name_col_length: 40
-            }
+            format: Format {
+                channel_name_col_length: 40,
+            },
         }
     }
 
     pub fn from_file(path: &str) -> Result<Config, std::io::Error> {
-        let mut config_file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .open(path)?;
+        let mut config_file = OpenOptions::new().read(true).write(true).open(path)?;
 
         let mut contents = String::new();
         config_file.read_to_string(&mut contents)?;
@@ -38,11 +35,12 @@ impl Config {
 
     pub fn write_to_file(&self, path: &str) {
         let mut file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .truncate(true)
-        .open(path).unwrap();
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(path)
+            .unwrap();
         file.write_all(toml::to_string(&self).unwrap().as_bytes());
     }
 }
