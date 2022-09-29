@@ -57,6 +57,8 @@ pub fn format_line(
     }
 }
 
+// TODO: add a test for this function
+// I think there is a case where it loops infinitely
 fn trim_to_length(s: &str, desired_width: usize) -> String {
     let mut left = 0;
     let mut right = s.len();
