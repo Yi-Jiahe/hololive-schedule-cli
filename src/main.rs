@@ -15,6 +15,8 @@ use holo_schedule::config::Config;
 use holo_schedule::formatter::{LiveStatus, format_line};
 
 fn main() {
+    let args = Arguments::parse();
+
     let home_dir = dirs::home_dir().unwrap();
     let config_dir = format!("{}/.holo-schedule", home_dir.display());
 
@@ -74,13 +76,11 @@ fn main() {
         }
     };
 
-    let args = Cli::parse();
-
     let filter = VideoFilterBuilder::new()
     .organisation(Organisation::Hololive)
     .language(&[Language::All])
     .video_type(VideoType::Stream)
-    .max_upcoming_hours(24)
+    .max_upcoming_hours(args.max_upcoming_hours as u32)
     .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
     .sort_by(VideoSortingCriteria::StartScheduled)
     .build();
@@ -131,8 +131,8 @@ use clap::Parser;
 
 /// List streams.
 #[derive(Parser)]
-struct Cli {
-    #[clap(default_value = "24", long = "max_upcoming_hours")]
+struct Arguments {
+    #[clap(default_value = "24", short='u', long = "max_upcoming_hours")]
     max_upcoming_hours: f32,
     #[clap(default_value = "11", long = "lookback_hours")]
     lookback_hours: f32,
