@@ -23,18 +23,28 @@ pub fn format_line(
 
     // Format channel name to be the fixed length
     let channel_name_width = UnicodeWidthStr::width(&channel_name[..]);
-
-    let channel_name_col = if config.format.channel_name_col_length > channel_name_width {
-        let channel_name_padding =
-            " ".repeat(config.format.channel_name_col_length - channel_name_width);
-        format!("{}{}", channel_name, channel_name_padding)
-    } else if config.format.channel_name_col_length < channel_name_width {
-        trim_to_length(&channel_name[..], config.format.channel_name_col_length)
+    let desired_channel_name_col_width = config.format.channel_name_col_length;
+    let channel_name_col = if desired_channel_name_col_width > channel_name_width {
+        let padding = " ".repeat(desired_channel_name_col_width - channel_name_width);
+        format!("{}{}", channel_name, padding)
+    } else if desired_channel_name_col_width < channel_name_width {
+        trim_to_length(&channel_name[..], desired_channel_name_col_width)
     } else {
         channel_name
     };
 
-    let line = format!("{:<20} {} {}", start, channel_name_col, stream_title);
+    let stream_title_width = UnicodeWidthStr::width(&stream_title[..]);
+    let desired_stream_title_col_width = config.format.stream_title_name_col_length;
+    let stream_title_col = if desired_stream_title_col_width > stream_title_width {
+        let padding = " ".repeat(desired_stream_title_col_width - stream_title_width);
+        format!("{}{}", stream_title, padding)
+    } else if desired_stream_title_col_width < stream_title_width {
+        trim_to_length(&stream_title[..], desired_stream_title_col_width)
+    } else {
+        stream_title
+    };
+
+    let line = format!("{:<15} {} {}", start, channel_name_col, stream_title_col);
 
     /* Colour Line based on live status
      *  Red for live
@@ -64,7 +74,7 @@ fn trim_to_length(s: &str, desired_width: usize) -> String {
         } else {
             break;
         }
-        pivot = (right + left)/2;
+        pivot = (right + left) / 2;
         while !s.is_char_boundary(pivot) {
             pivot -= 1;
         }

@@ -12,6 +12,7 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Format {
     pub channel_name_col_length: usize,
+    pub stream_title_name_col_length: usize,
 }
 
 impl Config {
@@ -19,7 +20,8 @@ impl Config {
         Config {
             holodex_api_token: "".to_string(),
             format: Format {
-                channel_name_col_length: 40,
+                channel_name_col_length: 25,
+                stream_title_name_col_length: 70,
             },
         }
     }
