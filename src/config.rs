@@ -1,4 +1,3 @@
-use std::fs;
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
@@ -6,13 +5,22 @@ use serde::{Serialize, Deserialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
-    pub holodex_api_token: String
+    pub holodex_api_token: String,
+    pub format: Format
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Format {
+    pub channel_name_col_length: usize
 }
 
 impl Config {
     pub fn new() -> Config {
         Config{
-            holodex_api_token: "".to_string()
+            holodex_api_token: "".to_string(),
+            format: Format{
+                channel_name_col_length: 40
+            }
         }
     }
 

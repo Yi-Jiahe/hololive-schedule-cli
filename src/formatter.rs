@@ -3,7 +3,7 @@ extern crate unicode_width;
 use unicode_width::UnicodeWidthStr;
 use ansi_term::Colour::{Red, RGB};
 
-const CHANNEL_NAME_FORMATTED_WIDTH: usize = 40;
+use crate::config::Config;
 
 pub enum LiveStatus {
     Ended,
@@ -12,14 +12,14 @@ pub enum LiveStatus {
     Other,
 }
 
-pub fn format_line(start: String, channel_name: String, stream_title: String, live_status: LiveStatus) -> String {
+pub fn format_line(config: &Config, start: String, channel_name: String, stream_title: String, live_status: LiveStatus) -> String {
     // TODO: Trim channel and stream titles if too long
 
     // Format channel name to be the fixed length
     let channel_name_width = UnicodeWidthStr::width(&channel_name[..]);
 
-    let channel_name_col = if CHANNEL_NAME_FORMATTED_WIDTH >= channel_name_width {
-        let channel_name_padding = " ".repeat(CHANNEL_NAME_FORMATTED_WIDTH - channel_name_width);
+    let channel_name_col = if config.format.channel_name_col_length >= channel_name_width {
+        let channel_name_padding = " ".repeat(config.format.channel_name_col_length - channel_name_width);
         format!("{}{}", channel_name, channel_name_padding)
     } else {
         channel_name
