@@ -5,21 +5,14 @@ use std::io::prelude::*;
 extern crate dirs;
 extern crate toml;
 
-use serde::{Serialize, Deserialize};
 use chrono::prelude::*;
-
-#[derive(Serialize, Deserialize)]
-struct Config {
-    holodex_api_token: String
-}
-
-
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation,
     VideoSortingCriteria, VideoType, VideoChannel, VideoLiveInfo, VideoStatus
 };
 
+use holo_schedule::config::Config;
 use holo_schedule::formatter::{LiveStatus, format_line};
 
 fn main() {
@@ -34,6 +27,9 @@ fn main() {
         }
     };
 
+    let mut config = Config::new();
+    config = dbg!(config);
+
     let mut config_file = OpenOptions::new()
                 .read(true)
                 .write(true)
@@ -43,7 +39,7 @@ fn main() {
     let mut contents = String::new();
     config_file.read_to_string(&mut contents).unwrap();
 
-    let config: Config = toml::from_str(&contents).unwrap();
+    config = toml::from_str(&contents).unwrap();
 
     if config.holodex_api_token == "" {
         // TODO: Prompt for token
