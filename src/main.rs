@@ -5,6 +5,7 @@ extern crate dirs;
 extern crate toml;
 
 use chrono::prelude::*;
+use chrono::Duration;
 
 use holodex::model::{
     builders::VideoFilterBuilder, ExtraVideoInfo, Language, Organisation, VideoChannel,
@@ -77,7 +78,7 @@ fn main() {
         }
     };
 
-    let filter = VideoFilterBuilder::new()
+    let mut filter = VideoFilterBuilder::new()
         .organisation(Organisation::Hololive)
         .language(&[Language::All])
         .video_type(VideoType::Stream)
@@ -85,6 +86,9 @@ fn main() {
         .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
         .sort_by(VideoSortingCriteria::StartScheduled)
         .build();
+
+    filter.from =
+        chrono::Utc::now().checked_sub_signed(Duration::hours(args.previous_hours as i64));
 
     let results = match client.videos(&filter) {
         Result::Ok(results) => results,
@@ -147,9 +151,13 @@ fn main() {
 
 use clap::Parser;
 
-/// List streams.
+/// A Command Line Application to retrieve a list of streams in a given time period
 #[derive(Parser)]
 struct Arguments {
-    #[clap(default_value = "24", short = 'u', long = "max_upcoming_hours")]
+    // How far in the past to display streams from
+    #[clap(default_value = "12", short = 'p', long = "previous_hours")]
+    previous_hours: f32,
+    // How far in the future to display streams from
+    #[clap(default_value = "12", short = 'u', long = "max_upcoming_hours")]
     max_upcoming_hours: f32,
 }
