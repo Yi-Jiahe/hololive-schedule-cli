@@ -78,17 +78,19 @@ fn main() {
         }
     };
 
-    let mut filter = VideoFilterBuilder::new()
+    let from = chrono::Utc::now()
+        .checked_sub_signed(Duration::hours(args.previous_hours as i64))
+        .unwrap();
+
+    let filter = VideoFilterBuilder::new()
         .organisation(Organisation::Hololive)
         .language(&[Language::All])
         .video_type(VideoType::Stream)
+        .after(from)
         .max_upcoming_hours(args.max_upcoming_hours as u32)
         .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
         .sort_by(VideoSortingCriteria::StartScheduled)
         .build();
-
-    filter.from =
-        chrono::Utc::now().checked_sub_signed(Duration::hours(args.previous_hours as i64));
 
     let results = match client.videos(&filter) {
         Result::Ok(results) => results,
