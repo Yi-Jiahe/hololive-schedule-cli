@@ -110,8 +110,8 @@ fn main() {
         }
     };
 
-    for stream in results.iter().rev() {
-        let start: DateTime<Local> = DateTime::from(match stream.live_info {
+    for video in results.iter().rev() {
+        let start: DateTime<Local> = DateTime::from(match video.live_info {
             VideoLiveInfo {
                 start_scheduled: _,
                 start_actual: Some(start_actual),
@@ -122,19 +122,19 @@ fn main() {
                 start_actual: None,
                 ..
             } => start_scheduled,
-            _ => panic!("Could not get start time"),
+            _ => video.available_at,
         });
 
-        let live_status = match stream.status {
+        let live_status = match video.status {
             VideoStatus::Upcoming => LiveStatus::Upcoming,
             VideoStatus::Live => LiveStatus::Live,
             VideoStatus::Past => LiveStatus::Ended,
             _ => LiveStatus::Other,
         };
 
-        match &stream.channel {
+        match &video.channel {
             VideoChannel::Min(channel_min) => {
-                let title = format!("{:<10} {}", stream.id.to_string(), stream.title.clone());
+                let title = format!("{:<10} {}", video.id.to_string(), video.title.clone());
                 println!(
                     "{}",
                     format_line(
