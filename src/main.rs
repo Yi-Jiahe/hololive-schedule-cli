@@ -39,7 +39,7 @@ fn main() {
         Err(err) => match err.kind() {
             std::io::ErrorKind::NotFound => {
                 let config = Config::new();
-                config.write_to_file(&config_file_path);
+                config.write_to_file(&config_file_path).unwrap();
                 config
             }
             _ => panic!("{}", err),
@@ -59,7 +59,7 @@ fn main() {
 
         config.holodex_api_token = token;
 
-        config.write_to_file(&config_file_path);
+        config.write_to_file(&config_file_path).unwrap();
     }
 
     let client = match holodex::Client::new(&config.holodex_api_token) {

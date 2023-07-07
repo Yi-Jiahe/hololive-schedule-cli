@@ -1,6 +1,16 @@
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
+#[derive(Debug)]
+pub enum ConfigWriteError {
+    TomlSerializeError {
+        cause: toml::ser::Error
+    },
+    FileWriteError {
+        cause: std::io::Error
+    }
+}
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -35,7 +45,7 @@ impl Config {
         Ok(config)
     }
 
-    pub fn write_to_file(&self, path: &str) {
+    pub fn write_to_file(&self, path: &str) -> Result<(), ConfigWriteError> {
         let mut file = OpenOptions::new()
             .read(true)
             .write(true)
@@ -43,6 +53,19 @@ impl Config {
             .truncate(true)
             .open(path)
             .unwrap();
-        file.write_all(toml::to_string(&self).unwrap().as_bytes());
+
+        match file.write_all(match toml::to_string(&self) {
+            Ok(s) => s,
+            Err(e) => return Err(ConfigWriteError::TomlSerializeError{
+                cause: e
+            })
+        }.as_bytes()) {
+            Ok(()) => (),
+            Err(e) => return Err(ConfigWriteError::FileWriteError{
+                cause: e
+            })
+        };
+        
+        Ok(())
     }
 }
