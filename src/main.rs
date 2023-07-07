@@ -82,12 +82,18 @@ fn main() {
         .checked_sub_signed(Duration::hours(args.previous_hours as i64))
         .unwrap();
 
+    let mut statuses = Vec::new();
+    if args.ended { statuses.push(VideoStatus::Past) };
+    if args.live { statuses.push(VideoStatus::Live) };
+    if args.upcoming { statuses.push(VideoStatus::Upcoming) };
+    
     let filter = VideoFilterBuilder::new()
         .organisation(Organisation::Hololive)
         .language(&[Language::All])
         .video_type(VideoType::Stream)
         .after(from)
         .max_upcoming_hours(args.max_upcoming_hours as u32)
+        .status(&statuses)
         .include(&[ExtraVideoInfo::Description, ExtraVideoInfo::LiveInfo])
         .sort_by(VideoSortingCriteria::StartScheduled)
         .build();
@@ -151,7 +157,7 @@ fn main() {
     }
 }
 
-use clap::Parser;
+use clap::{Parser};
 
 /// A Command Line Application to retrieve a list of streams in a given time period
 #[derive(Parser)]
@@ -162,4 +168,14 @@ struct Arguments {
     // How far in the future to display streams from
     #[clap(default_value = "12", short = 'u', long = "max_upcoming_hours")]
     max_upcoming_hours: f32,
+
+    // Show ended streams
+    #[clap(action, default_value_t = false, long = "ended")]
+    ended: bool,
+    // Show live streams (Default: True)
+    #[clap(action, default_value_t = true, long = "live")]
+    live: bool,
+    // Show upcoming streams (Default: True)
+    #[clap(action, default_value_t = true, long="upcoming")]
+    upcoming: bool,
 }
