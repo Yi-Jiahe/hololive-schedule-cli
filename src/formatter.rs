@@ -16,6 +16,7 @@ pub fn format_line(
     config: &Config,
     start: String,
     channel_name: String,
+    video_id: String,
     stream_title: String,
     live_status: LiveStatus,
 ) -> String {
@@ -41,7 +42,7 @@ pub fn format_line(
         stream_title
     };
 
-    let line = format!("{:<15} {} {}", start, channel_name_col, stream_title_col);
+    let line = format!("{:<15}\t{}\t{}\t{}", start, channel_name_col, video_id, stream_title_col);
 
     /* Colour Line based on live status
      *  Red for live

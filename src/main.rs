@@ -140,14 +140,14 @@ fn main() {
 
         match &video.channel {
             VideoChannel::Min(channel_min) => {
-                let title = format!("{:<10} {}", video.id.to_string(), video.title.clone());
                 println!(
                     "{}",
                     format_line(
                         &config,
                         start.format("%e %b %H:%M").to_string(),
                         channel_min.name.clone(),
-                        title,
+                        video.id.to_string(),
+                        video.title.clone(),
                         live_status
                     )
                 );
