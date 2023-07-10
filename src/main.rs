@@ -138,22 +138,43 @@ fn main() {
             _ => LiveStatus::Other,
         };
 
-        match &video.channel {
-            VideoChannel::Min(channel_min) => {
-                println!(
-                    "{}",
-                    format_line(
-                        &config,
-                        start.format("%e %b %H:%M").to_string(),
-                        channel_min.name.clone(),
-                        video.id.to_string(),
-                        video.title.clone(),
-                        live_status
-                    )
-                );
+        // Videos only contain either the channel id or a minimal channel min struct
+        let channel_name = match &video.channel {
+            VideoChannel::Min(channel_min) => channel_min.name.clone(),
+            VideoChannel::Id(channel_id) => {
+                let mut retries = 0;
+                let channel = loop {
+                    match channel_id.metadata(&client) {
+                        Ok(channel) => break Some(channel),
+                        Err(holodex::errors::Error::ApiRequestFailed{..}) => {
+                            if retries < 3 { 
+                                retries += 1;
+                                continue 
+                            }
+                            else { break None }
+                        },
+                        Err(holodex::errors::Error::InvalidResponse{..}) => break None,
+                        _ => unreachable!()
+                    }
+                };
+                match channel {
+                    Some(channel) => channel.name,
+                    None => channel_id.to_string(),
+                }
             }
-            _ => (),
-        }
+        };
+
+        println!(
+            "{}",
+            format_line(
+                &config,
+                start.format("%e %b %H:%M").to_string(),
+                channel_name,
+                video.id.to_string(),
+                video.title.clone(),
+                live_status
+            )
+        );
     }
 }
 
